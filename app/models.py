@@ -38,7 +38,7 @@ class Stream(Base):
     __tablename__ = "stream"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("user.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
     title = Column(String)
     topic = Column(String)
     status = Column(String, default=StreamStatus.PLANNED.value)
@@ -50,5 +50,5 @@ class AuthToken(Base):
 
     id = Column(Integer, primary_key=True)
     token = Column(String)
-    user_id = Column(Integer, ForeignKey("user.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)

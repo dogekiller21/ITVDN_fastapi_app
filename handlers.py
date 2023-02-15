@@ -2,6 +2,7 @@ import uuid
 from fastapi import APIRouter, Body, Depends, HTTPException
 from starlette import status
 
+from app.auth import check_auth_token
 from app.forms import UserLoginForm, UserCreateForm
 from app.models import connect_db, User, AuthToken
 from app.utils import get_password_hash
@@ -18,7 +19,7 @@ async def login(user_form: UserLoginForm = Body(..., embed=True),
     token = AuthToken(token=str(uuid.uuid4()), user_id=user.id)
     database.add(token)
     database.commit()
-    return {"status": "OK"}
+    return {"auth_token": token.token}
 
 
 @router.post("/user", name="user:create")
@@ -39,3 +40,11 @@ async def create_user(user: UserCreateForm,
     database.add(new_user)
     database.commit()
     return {"user_id": new_user.id}
+
+
+@router.get("/user", name="user:get")
+async def get_user(token: AuthToken = Depends(check_auth_token), database=Depends(connect_db)):
+
+    user = database.query(User).filter(User.id == token.user_id).one_or_none()
+
+    return {"user_id": user.id, "email": user.email, "username": user.username}
